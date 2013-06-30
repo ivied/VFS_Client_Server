@@ -50,7 +50,8 @@ public class FolderTest {
         Assert.assertFalse(folder12.exist);
         Folder folder13 = new Folder("C:\\Test3", FileSystem.getInstance().ROOT_FOLDER);
         Assert.assertTrue(folder13.exist);
-
+        Folder folder14 = new Folder("Test3", folder);
+        Assert.assertTrue(folder14.exist);
 
 
     }

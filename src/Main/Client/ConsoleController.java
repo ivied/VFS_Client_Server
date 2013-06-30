@@ -11,11 +11,6 @@ import java.util.List;
 public class ConsoleController {
 
     private String commandLine;
-
-    public enum  Commands {
-        CONNECT, PING, MD
-    }
-
     private Client client;
     ClientConsole clientConsole = new ClientConsole();
 
@@ -33,29 +28,25 @@ public class ConsoleController {
     }
 
     public void doCommand(String[] command)  {
+
         try{
-            switch (Commands.valueOf(command[0].toUpperCase())){
-                case CONNECT:
+
+            switch (command[0]){
+                case "connect":
                     connectClient(command);
-
                     break;
-                case PING:
-                    messagingWithServer("ping");
 
-                    break;
-                case MD:
-                    messagingWithServer(commandLine);
-
-                    break;
                 default:
-                    write ("Unhandle command");
-
+                    messagingWithServer(commandLine);
+                    break;
             }
         }    catch (IllegalArgumentException e)  {
             write ("Wrong command");
 
         }
         doNewCommand();
+
+
     }
 
 
@@ -94,7 +85,7 @@ public class ConsoleController {
 
     public void write(List<String> message){
         for (String line : message){
-        clientConsole.write(line);
+            clientConsole.write(line);
         }
     }
 

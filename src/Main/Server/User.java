@@ -17,7 +17,7 @@ import java.util.Timer;
  * To change this template use File | Settings | File Templates.
  */
 public class User  extends Thread {
-
+    FileSystemController fileSystemController = new FileSystemController();
         Server server = null;
 
         // Сокет пользователя
@@ -71,7 +71,7 @@ public class User  extends Thread {
                             break;
                         }
                         else if(!messageReceived.isEmpty()) {
-                            FileSystemController fileSystemController = new FileSystemController();
+
                             List<String> answer = fileSystemController.doCommand(messageReceived);
                             for(String line : answer){
                             printStream.println(line);

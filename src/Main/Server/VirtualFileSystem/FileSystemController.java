@@ -20,24 +20,24 @@ public class FileSystemController {
 
     private static final FileSystem fileSystem = FileSystem.getInstance();
     public enum Commands {
-         MD, PING
+         MD, PING, CD
     }
 
     public List<String> doCommand(String messageReceived) {
-       ArrayList<String> messageAsArray = new ArrayList<String>(Arrays.asList( messageReceived.split(" ")));
-       Commands command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
-        messageAsArray.remove(0);
+
         try{
+            ArrayList<String> messageAsArray = new ArrayList<String>(Arrays.asList( messageReceived.split(" ")));
+            Commands command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
+            messageAsArray.remove(0);
+
+            synchronized (fileSystem)  {
             switch (command){
-                case MD:
-                    return createFolder(messageAsArray);
+                case MD: return createFolder(messageAsArray);
+                case CD: return changeCurrentFolder(messageAsArray);
+                case PING: return answer("pong");
+                default:  return answer("Unhandle command");
 
-                case PING:
-                    return answer("pong");
-
-                default:
-                    return answer("Unhandle command");
-
+            }
             }
         }    catch (IllegalArgumentException e)  {
             return answer("Wrong command");
@@ -47,12 +47,22 @@ public class FileSystemController {
 
     }
 
+    public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
+       // currentFolder.makeDataForCheckPath(messageAsArray.get(0));
+         Folder newCurrentFolder = currentFolder.checkPath(new ArrayList(Arrays.asList(messageAsArray.get(0).split("\\\\"))), currentFolder);
+       if (newCurrentFolder == null) return answer("Can not change directory");
+        else {
+           currentFolder = newCurrentFolder;
+           return answer ("Current directory " + newCurrentFolder.name );
+       }
+    }
+
     private List<String> createFolder(ArrayList<String> messageAsArray) {
-        synchronized (fileSystem)  {
+
         Folder folder = new Folder(messageAsArray.get(0), currentFolder);
 
         return folder.exist? answer("Create " + folder.name): answer("Bad path");
-        }
+
     }
 
     private List <String> answer(String message) {
