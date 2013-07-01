@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class File extends FileSystemObj {
-
+    public ArrayList<String> users_locks = new ArrayList<>();
 
 
     public File(String path, Folder currentFolder) {

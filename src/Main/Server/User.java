@@ -1,13 +1,9 @@
-import VirtualFileSystem.FileSystemController;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,8 +33,7 @@ public class User  extends Thread {
             super("User Thread");
             this.server = chatServer;
             this.socket = socket;
-            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-            printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
+
             start();
         }
 
@@ -46,6 +41,8 @@ public class User  extends Thread {
         @Override
         public void run() {
             try {
+                bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+                printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
                 // Предлагаем пользователю ввести свое имя
 
                 // IP пользователя
@@ -72,7 +69,7 @@ public class User  extends Thread {
                         }
                         else if(!messageReceived.isEmpty()) {
 
-                            List<String> answer = fileSystemController.doCommand(messageReceived);
+                            List<String> answer = fileSystemController.doCommand(messageReceived, this);
                             for(String line : answer){
                             printStream.println(line);
 

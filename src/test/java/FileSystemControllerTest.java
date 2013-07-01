@@ -1,5 +1,6 @@
-package VirtualFileSystem;
-
+import VirtualFileSystem.File;
+import VirtualFileSystem.FileSystem;
+import VirtualFileSystem.Folder;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class FileSystemControllerTest {
         Assert.assertTrue(answers.get(0).equals("Current directory testChange"));
         Folder folder1 = new Folder("C:\\testChange\\test", FileSystem.getInstance().ROOT_FOLDER);
         Assert.assertTrue(folder1.exist);
-               directories.add(0,"C:\\testChange\\test");
+        directories.add(0,"C:\\testChange\\test");
         answers = fileSystemController.changeCurrentFolder( directories);
         Assert.assertTrue(answers.get(0).equals("Current directory test"));
         directories.add(0,"C:");
@@ -43,6 +44,15 @@ public class FileSystemControllerTest {
         directories.add(0,"testChange");
         answers = fileSystemController.changeCurrentFolder( directories);
         Assert.assertTrue(answers.get(0).equals("Current directory testChange"));
+
+
+        //LOCK file tests
+      /*  File file= new File ("test.lock", FileSystem.getInstance().ROOT_FOLDER)     ;
+        directories.add(0,"C:");
+        fileSystemController.changeCurrentFolder( directories);
+        directories.add(0,"test.lock");
+        mustBe = fileSystemController.lockOrUnlockFile(directories);
+        Assert.assertTrue(mustBe.get(0).equals("Lock test.test"));*/
 
 
     }

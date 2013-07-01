@@ -13,7 +13,7 @@ import java.util.List;
  */
 abstract public class FileSystemObj {
    // protected final static Folder ROOT_FOLDER = new Folder ("C:", null);
-    String name;
+    public String name;
     Folder parentFolder;
     public boolean exist = false;
 
@@ -36,7 +36,7 @@ abstract public class FileSystemObj {
     }
 
 
-    protected Folder checkPath (List<String> parentFoldersName, Folder startFolder) {
+    public FileSystemObj checkPath(List<String> parentFoldersName, Folder startFolder) {
 
         if (parentFoldersName.get(0).equals("C:")) {
             startFolder =   FileSystem.getInstance().ROOT_FOLDER ;
@@ -49,7 +49,7 @@ abstract public class FileSystemObj {
 
     }
 
-    private Folder checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
+    private FileSystemObj checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
         Folder savedFolder = startFolder;
         for (int subObjNumber = 1; subObjNumber != parentFoldersName.size(); subObjNumber++ ){
             String subObjName = parentFoldersName.get(subObjNumber);
@@ -57,7 +57,7 @@ abstract public class FileSystemObj {
 
             FileSystemObj fileSystemObj = startFolder.checkObjExist(startFolder.folderList, subObjName);
 
-            if (fileSystemObj != null && fileSystemObj.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.File"))return savedFolder;
+            if (fileSystemObj != null && fileSystemObj.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.File"))return fileSystemObj;
             startFolder = (Folder) fileSystemObj;
             if ((startFolder == null)&&(subObjNumber == parentFoldersName.size()-1)) return null;
             if (startFolder == null ) return savedFolder;
