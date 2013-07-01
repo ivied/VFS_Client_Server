@@ -13,31 +13,29 @@ import java.util.List;
  * Time: 13:28
  * To change this template use File | Settings | File Templates.
  */
-public class Client extends Thread{
+public class Client {
 
     ConsoleController consoleController;
     protected Socket serverSocket;
     private ConnectData connectData;
-
-
+    PrintWriter output;
+    MessageReceiver messageReceiver;
     public  Client(){
         consoleController = new ConsoleController(this);
 
     }
 
 
-
-
-
-
-
     public void connect(ConnectData connectData ) throws IOException {
+        //close command there if(messageReceiver != null){closeSocket()}
         this.connectData = connectData;
 
         serverSocket = new Socket(connectData.ip,connectData.port);
 
         messagingWithServer(connectData.userName) ;
-        Main.client.start();
+        messageReceiver = new MessageReceiver();
+        messageReceiver.start();
+
 
 
       /*  out.close();
@@ -48,8 +46,8 @@ public class Client extends Thread{
 
     public List<String> messagingWithServer(String message) throws IOException {
 
-        PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
-        out.println(message);
+        output = new PrintWriter(serverSocket.getOutputStream(), true);
+        output.println(message);
 
         /*BufferedReader input = new
                 BufferedReader(new
@@ -67,37 +65,34 @@ public class Client extends Thread{
 
     }
 
-    public void ping() {
-        try {
-            messagingWithServer("ping");
 
+    public class MessageReceiver extends Thread{
+        @Override
+        public void run() {
 
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    }
-
-
-    @Override
-    public void run() {
-        while(true) {
             try {
 
                 BufferedReader input = new
                         BufferedReader(new
                         InputStreamReader(serverSocket.getInputStream()));
-                String fuser;
-                while ((fuser = input.readLine())!=null) {
+                String messageFromServer;
+                while ((messageFromServer = input.readLine())!=null) {
 
-                    consoleController.write("Server say: " + fuser);
+                    consoleController.write("Server say: " + messageFromServer);
 
-                    if (fuser.equalsIgnoreCase("close")) break;
-                    if (fuser.equalsIgnoreCase("exit")) break;
+                    if (messageFromServer.equalsIgnoreCase("close")) break;
+
                 }
+
+                output.close();
+                input.close();
+                serverSocket.close();
             } catch (Exception ex) {
             }
+
         }
     }
+
   /*  public static void main(String[] args) throws IOException {
 
         readInputData();

@@ -3,8 +3,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,7 @@ import java.util.regex.Pattern;
  * Time: 15:05
  * To change this template use File | Settings | File Templates.
  */
-public class ServerGUI extends JFrame implements ActionListenerServerSide {
+public class ServerGUI extends JFrame implements GUIListener {
     private static final String CONFIG_FILE="ServerConfig.txt";
     private static final String PORT = "port";
     private static final String IP = "ip";
@@ -33,7 +31,7 @@ public class ServerGUI extends JFrame implements ActionListenerServerSide {
         setLayout(new BorderLayout());
         server = new Server();
         // Регистрируемся в качестве слушателя событий
-        server.addListener(this);
+        server.GUIRegistration(this);
         initComponents();
     }
 
@@ -82,6 +80,11 @@ public class ServerGUI extends JFrame implements ActionListenerServerSide {
         //Отображаем в компоненте новое сообщение
         textArea.append("\n<"+user.userName+"> "+message);
         // Пишем данные в файл...
+    }
+
+
+    public void printOnServer(String message) {
+        textArea.append("\n"+message);
     }
 
 

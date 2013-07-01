@@ -41,7 +41,7 @@ public class ConsoleController {
                     break;
             }
         }    catch (IllegalArgumentException e)  {
-            write ("Wrong command");
+
 
         }
         doNewCommand();

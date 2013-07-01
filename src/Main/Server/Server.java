@@ -9,27 +9,28 @@ import java.util.LinkedList;
  * Time: 12:55
  * To change this template use File | Settings | File Templates.
  */
-public class Server extends Thread implements ActionListenerServerSide{
+public class Server extends Thread implements GUIListener {
 
 
-        // Хранит онлайн пользователей чата
-        public LinkedList<User> userList;
-        // Хранит слушателей сервера
-        private LinkedList<ActionListenerServerSide> listenerList;
-        // СерверСокет
-        private ServerSocket serverSocket;
+    // Хранит онлайн пользователей чата
+    public LinkedList<User> userList;
 
-        // Обьект синхронизации доступа
-        private final Object lock = new Object();
+    // СерверСокет
+    private ServerSocket serverSocket;
 
-        // Конструктор
-        public Server() {
-            super("File server");
-            userList = new LinkedList<User>();
-            listenerList = new LinkedList<ActionListenerServerSide>();
-        }
+    // Обьект синхронизации доступа
+    private final Object lock = new Object();
 
-        // Запускает сервер на определенном порту
+    ServerGUI GUI ;
+
+    // Конструктор
+    public Server() {
+        super("File server");
+        userList = new LinkedList<User>();
+
+    }
+
+    // Запускает сервер на определенном порту
     public void init(String ip, int port) {
         try {
             serverSocket = new ServerSocket(port);
@@ -54,7 +55,7 @@ public class Server extends Thread implements ActionListenerServerSide{
                 // он выполняется паралельно данному потоку, и ниче не блочит.
                 // Сервер переходит к готовности принять новое соединение
                 User user = new User(this, socket);
-               // userList.add(user);
+
             } catch (Exception ex) {
             }
         }
@@ -63,29 +64,35 @@ public class Server extends Thread implements ActionListenerServerSide{
     /***************** отправка сообщения всем пользователям ****************/
     // sender - отправитель
 
-    public void sendChatMessage(User sender, String message) {
+    public void userMakeChanges(String changes, User changeMaker) {
+        String message = "User " + changeMaker.userName + " "+ changes;
         synchronized(lock) {
             for(User user : userList) {
                 try {
-                    user.printStream.println("<"+(sender!=null ? sender.userName : "server")+"> "+message);
-                } catch (Exception ex) {}
+
+                    if (!user.equals(changeMaker)) user.printStream.println(message);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
             }
+            GUI.printOnServer(message);
         }
     }
+
 
     /******************** добавление/удаление слушателей ********************/
 
     // Добавляет слушателя событий сервера
-    public void addListener(ActionListenerServerSide listener) {
-        synchronized(lock) {
-            listenerList.add(listener);
-        }
+    public void GUIRegistration(ServerGUI GUI) {
+        this.GUI =  GUI;
     }
 
     // Удаляет слушателя
-    public void removeListener(ActionListenerServerSide listener) {
+    public void removeListener(GUIListener listener) {
         synchronized(lock) {
-            listenerList.remove(listener);
+            //listenerList.remove(listener);
         }
     }
 
@@ -93,42 +100,45 @@ public class Server extends Thread implements ActionListenerServerSide{
 
     public void serverStarted(String ip, int port) {
         synchronized(lock) {
-            for(ActionListenerServerSide listener : listenerList) {
-                listener.serverStarted(ip, port);
-            }
+
+            GUI.serverStarted(ip, port);
+
         }
     }
 
     public void serverStopped() {
         synchronized(lock) {
-            for(ActionListenerServerSide listener : listenerList) {
-                listener.serverStopped();
-            }
+
+            GUI.serverStopped();
+
         }
     }
 
     public void onUserConnected(User user) {
         synchronized(lock) {
-            for(ActionListenerServerSide listener : listenerList) {
-                listener.onUserConnected(user);
-            }
+            userList.add(user);
+            GUI.onUserConnected(user);
+
         }
     }
 
     public void onUserDisconnected(User user) {
         synchronized(lock) {
-            for(ActionListenerServerSide listener : listenerList) {
-                listener.onUserDisconnected(user);
-            }
+            userList.remove(user);
+            GUI.onUserDisconnected(user);
+
         }
     }
 
     public void onMessageReceived(User user, String message) {
         synchronized(lock) {
-            for(ActionListenerServerSide listener : listenerList) {
-                listener.onMessageReceived(user, message);
-            }
+
+            GUI.onMessageReceived(user, message);
+
         }
     }
+
+
+
 
 }

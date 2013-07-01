@@ -69,12 +69,16 @@ public class FileSystemController {
 
     private List<String> unLockFileAndAnswer(File fileToLock) {
         fileToLock.users_locks.remove(user.userName);
-        return answer("Unlock " + fileToLock.name);
+        String changes = "Unlock " + fileToLock.name;
+
+        return answerWithFileSystemChanges(changes);
     }
 
     private List<String> lockFileAndAnswer(File fileToLock) {
         fileToLock.users_locks.add(user.userName);
-        return answer("Lock " + fileToLock.name);
+        String changes = "Lock " + fileToLock.name;
+
+        return answerWithFileSystemChanges(changes);
     }
 
     private FileSystemObj checkPath(ArrayList<String> messageAsArray) {
@@ -83,11 +87,18 @@ public class FileSystemController {
 
     private List<String> makeFile(ArrayList<String> messageAsArray) {
         File file = new File(messageAsArray.get(0), currentFolder);
-        return file.exist? answer("Create " + file.name): answer("Bad path");  //To change body of created methods use File | Settings | File Templates.
+        return file.exist? answerWithFileSystemChanges("Create " + file.name): answer("Bad path");  //To change body of created methods use File | Settings | File Templates.
     }
 
+    private List<String> answerWithFileSystemChanges(String changes) {
+        user.iMakeChanges(changes);
+        return answer(changes);
+    }
+
+
+
     public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
-        // currentFolder.makeDataForCheckPath(messageAsArray.get(0));
+
         FileSystemObj newCurrentFolder = checkPath(messageAsArray);
         if ((newCurrentFolder) != null && (newCurrentFolder.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.Folder")))  {
             currentFolder = (Folder) newCurrentFolder;
@@ -99,7 +110,7 @@ public class FileSystemController {
 
         Folder folder = new Folder(messageAsArray.get(0), currentFolder);
 
-        return folder.exist? answer("Create " + folder.name): answer("Bad path");
+        return folder.exist? answerWithFileSystemChanges("Create " + folder.name): answer("Bad path");
 
     }
 

@@ -43,12 +43,26 @@ public class User  extends Thread {
             try {
                 bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
                 printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
+
                 // Предлагаем пользователю ввести свое имя
 
                 // IP пользователя
+
                 userIp = socket.getInetAddress().getHostAddress();
                 // Получаем логин пользователя
                 userName = bufferedReader.readLine(); // блокируется пока не получит строки!
+
+                server.GUI.printOnServer("New user " + userName + " try connect to Server");
+                synchronized (server)   {
+                for (User user : server.userList){
+                    if (user.userName.equals(userName)) {
+                        printStream.println("This UserName already engaged");
+                        closeSocket();
+                        return;
+
+                    }
+                }      }
+
                 // Нотификация о подключении нового пользователя
                 server.onUserConnected(this);
                 // Помещаем пользователя в список пользователей
@@ -94,17 +108,22 @@ public class User  extends Thread {
     private void closeSocket() {
         try {
             // Нотификация: пользователь отключился
+            printStream.println("close");
             server.onUserDisconnected(this);
             // Отправляем всем сообщение
          //   server.sendChatMessage(null, "Отключен пользователь: "+userName);
             // Удаляем пользователя со списка онлайн
         //    server.userList.remove(this);
             // Закрываем потоки
+
             bufferedReader.close();
             printStream.close();
             socket.close();
         } catch (Exception ex) {}
     }
 
+    public void iMakeChanges(String changes) {
+        server.userMakeChanges(changes, this);
+    }
 }
 

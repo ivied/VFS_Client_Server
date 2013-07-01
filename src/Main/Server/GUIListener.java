@@ -5,7 +5,7 @@
  * Time: 14:50
  * To change this template use File | Settings | File Templates.
  */
-public interface ActionListenerServerSide {
+public interface GUIListener {
     /****** События *******/
 
     // Сервер запустился
@@ -22,4 +22,6 @@ public interface ActionListenerServerSide {
 
     // Получено сообщение от пользователя
     public void onMessageReceived(User user, String message)     ;
+
+
 }
