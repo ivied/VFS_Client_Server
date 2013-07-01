@@ -20,7 +20,7 @@ public class FileSystemController {
 
     private static final FileSystem fileSystem = FileSystem.getInstance();
     public enum Commands {
-         MD, PING, CD
+         MD, PING, CD, MF
     }
 
     public List<String> doCommand(String messageReceived) {
@@ -34,6 +34,7 @@ public class FileSystemController {
             switch (command){
                 case MD: return createFolder(messageAsArray);
                 case CD: return changeCurrentFolder(messageAsArray);
+                case MF: return makeFile(messageAsArray);
                 case PING: return answer("pong");
                 default:  return answer("Unhandle command");
 
@@ -45,6 +46,11 @@ public class FileSystemController {
         }
 
 
+    }
+
+    private List<String> makeFile(ArrayList<String> messageAsArray) {
+        File file = new File(messageAsArray.get(0), currentFolder);
+        return file.exist? answer("Create " + file.name): answer("Bad path");  //To change body of created methods use File | Settings | File Templates.
     }
 
     public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
