@@ -16,7 +16,7 @@ public class ConsoleController {
 
     ConsoleController (Client client) {
         this.client = client;
-        write("Welcome to Client app");
+        write("Welcome to Client app! At the beginning connect to server ");
 
     }
 
@@ -71,7 +71,7 @@ public class ConsoleController {
     }
 
     public String [] getCommand(){
-        write("Type command");
+        //write("Type command");
         commandLine  = clientConsole.readNewInput();
         String  [] command =   commandLine.split(" ");
 

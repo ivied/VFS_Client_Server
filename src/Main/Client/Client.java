@@ -27,7 +27,7 @@ public class Client {
 
 
     public void connect(ConnectData connectData ) throws IOException {
-        //close command there if(messageReceiver != null){closeSocket()}
+        if (messageReceiver != null){messageReceiver.interrupt();}
         this.connectData = connectData;
 
         serverSocket = new Socket(connectData.ip,connectData.port);
@@ -45,10 +45,12 @@ public class Client {
     }
 
     public List<String> messagingWithServer(String message) throws IOException {
-
+         if (serverSocket != null)    {
         output = new PrintWriter(serverSocket.getOutputStream(), true);
         output.println(message);
-
+         } else {
+             consoleController.write("At the beginning connect to server!");
+         }
         /*BufferedReader input = new
                 BufferedReader(new
                 InputStreamReader(serverSocket.getInputStream()));

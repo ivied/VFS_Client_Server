@@ -73,6 +73,7 @@ public class User  extends Thread {
                 // основной цикл обработки
                 while(true) {
                     try {
+                        printStream.println("Type new command");
                         // Читаем новое сообщение от пользователя
                         String messageReceived = bufferedReader.readLine(); // блокируется пока не получит строки или null!
                         if(messageReceived==null) {
@@ -88,6 +89,7 @@ public class User  extends Thread {
                             printStream.println(line);
 
                             }
+
                             // Нотификация: получено сообщение
                             server.onMessageReceived(this, messageReceived);
                             // Отправляем всем сообщение
