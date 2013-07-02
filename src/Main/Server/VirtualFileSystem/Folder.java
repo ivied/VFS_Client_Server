@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Folder extends FileSystemObj {
 
-    protected ArrayList<FileSystemObj> folderList = new ArrayList<FileSystemObj>();
+    public ArrayList<FileSystemObj> folderList = new ArrayList<FileSystemObj>();
 
     public Folder(String path, Folder currentFolder) {
         super(path, currentFolder);

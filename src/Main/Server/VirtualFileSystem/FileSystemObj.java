@@ -14,7 +14,8 @@ import java.util.List;
 abstract public class FileSystemObj {
    // protected final static Folder ROOT_FOLDER = new Folder ("C:", null);
     public String name;
-    Folder parentFolder;
+    private Folder parentFolder;
+    public Folder trueParentFolder;
     public boolean exist = false;
 
     public FileSystemObj(String path,Folder currentFolder){
@@ -29,6 +30,7 @@ abstract public class FileSystemObj {
         if (checkPath(parentFoldersName, currentFolder)==null){
 
             parentFolder.folderList.add(this);
+            trueParentFolder = parentFolder;
             exist = true;
         }
 
@@ -38,7 +40,7 @@ abstract public class FileSystemObj {
 
     public FileSystemObj checkPath(List<String> parentFoldersName, Folder startFolder) {
 
-        if (parentFoldersName.get(0).equals("C:")) {
+        if (parentFoldersName.get(0).equalsIgnoreCase("C:")) {
             startFolder =   FileSystem.getInstance().ROOT_FOLDER ;
 
         }else{
@@ -57,7 +59,7 @@ abstract public class FileSystemObj {
 
             FileSystemObj fileSystemObj = startFolder.checkObjExist(startFolder.folderList, subObjName);
 
-            if (fileSystemObj != null && fileSystemObj.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.File"))return fileSystemObj;
+            if (fileSystemObj != null && fileSystemObj.getClass() == File.class)return fileSystemObj;
             startFolder = (Folder) fileSystemObj;
             if ((startFolder == null)&&(subObjNumber == parentFoldersName.size()-1)) return null;
             if (startFolder == null ) return savedFolder;

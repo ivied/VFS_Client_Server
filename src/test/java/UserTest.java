@@ -1,3 +1,8 @@
+import VirtualFileSystem.File;
+import VirtualFileSystem.FileSystem;
+import VirtualFileSystem.Folder;
+import junit.framework.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,16 +22,28 @@ import static org.junit.Assert.assertTrue;
 public class UserTest {
     FileSystemController fileSystemController = new FileSystemController();
     List<String> mustBe = new ArrayList<>();
-    @Test
-    public void userTests () throws IOException {
+    List<String> answer;
+    User user;
+    User user2;
 
-        Socket socket= new Socket();
+    Server server = new Server();
 
-        User user = new User((new Server()),(new Socket()));
+
+    @Before
+    public void setUp () throws IOException {
+        server.GUI = new ServerGUI();
+        user = new User(server,(new Socket()));
         user.userName = "Tester";
-        User user2 = new User((new Server()),(new Socket()));
+
+        user2 = new User(server,(new Socket()));
         user2.userName = "Tester2";
-        List<String> answer = fileSystemController.doCommand("ping",user);
+    }
+
+    @Test
+    public void userLockUnlockTest () throws IOException {
+
+
+        answer = fileSystemController.doCommand("ping",user);
         mustBe.clear();
         mustBe.add("pong");
         assertTrue(answer.equals(mustBe));
@@ -56,8 +73,61 @@ public class UserTest {
         assertTrue(answer.equals(mustBe));
 
 
+
     }
 
+    @Test
+    public void userRDTests () throws IOException {
+        Folder folder = new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
+        Assert.assertTrue(folder.name.equals("testRD"));
+        answer = fileSystemController.doCommand("rd testRD",user2);
+        mustBe.clear();
+        mustBe.add("Remove folder testRD");
+        assertTrue(answer.equals(mustBe));
 
+
+
+        File file= new File ("testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+        Assert.assertTrue(file.exist);
+        answer = fileSystemController.doCommand("rd testRD.RD",user2);
+        mustBe.clear();
+        mustBe.add("For remove file use DEL command");
+        assertTrue(answer.equals(mustBe));
+
+
+        new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
+          new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+         answer = fileSystemController.doCommand("rd testRD",user2);
+        mustBe.clear();
+        mustBe.add("Remove folder testRD");
+        assertTrue(answer.equals(mustBe));
+
+
+
+        new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\testRD\\test", FileSystem.getInstance().ROOT_FOLDER);
+        new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER) ;
+        answer = fileSystemController.doCommand("rd testRD",user2);
+        mustBe.clear();
+        mustBe.add("Deleting Folder consist subFolders");
+        assertTrue(answer.equals(mustBe));
+
+
+
+        new File ("testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+        answer = fileSystemController.doCommand("lock testRD.RD",user);
+        mustBe.clear();
+        mustBe.add("Lock testRD.RD");
+        assertTrue(answer.equals(mustBe));
+
+
+        new Folder("C:\\testRD2", FileSystem.getInstance().ROOT_FOLDER);
+        new File ("testRD2\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER) ;
+        answer =  fileSystemController.doCommand("lock testRD2\\testRD.RD",user2);
+        answer = fileSystemController.doCommand("rd testRD2",user2);
+        mustBe.clear();
+        mustBe.add("Folder locked");
+        assertTrue(answer.equals(mustBe));
+    }
 
 }

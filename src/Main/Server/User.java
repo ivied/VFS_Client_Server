@@ -38,6 +38,9 @@ public class User  extends Thread {
     @Override
     public void run() {
         try {
+
+            if(!socket.isConnected()) return;   //just for tests !!
+
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
 

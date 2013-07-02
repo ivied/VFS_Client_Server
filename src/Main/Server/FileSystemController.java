@@ -23,7 +23,7 @@ public class FileSystemController {
     private User user;
 
     public enum Commands {
-        MD, PING, CD, MF, LOCK, UNLOCK
+        MD, PING, CD, MF, LOCK, UNLOCK, RD
     }
 
     public List<String> doCommand(String messageReceived, User user) {
@@ -40,6 +40,7 @@ public class FileSystemController {
                     case MF: return makeFile(messageAsArray);
                     case LOCK: return lockOrUnlockFile(messageAsArray, LOCK);
                     case UNLOCK: return lockOrUnlockFile(messageAsArray, UNLOCK);
+                    case RD: return removeFolder(messageAsArray);
                     case PING: return answer("pong");
                     default:  return answer("Unhandle command");
 
@@ -53,9 +54,28 @@ public class FileSystemController {
 
     }
 
+    private List<String> removeFolder(ArrayList<String> messageAsArray) {
+        FileSystemObj objToRemove = checkPath(messageAsArray);
+        if (objToRemove == null)  return answer("Bad path");
+        if (objToRemove.getClass() != Folder.class)  return answer("For remove file use DEL command") ;
+        Folder folderToDelete = (Folder) objToRemove;
+        for (FileSystemObj fileSystemObj: folderToDelete.folderList) {
+            if (fileSystemObj.getClass() == Folder.class) return answer("Deleting Folder consist subFolders");  }
+        return (folderToDelete != currentFolder ) ? answerRemovingFolder(folderToDelete)  : answer("Bad path");
+
+    }
+
+    private List<String> answerRemovingFolder(FileSystemObj objToRemove) {
+        String answerIfRemove = "Remove folder " + objToRemove.name;
+        String deleteTryingMessage = FileSystem.getInstance().deleteObject(objToRemove);
+        return deleteTryingMessage.equalsIgnoreCase(answerIfRemove)? answerWithFileSystemChanges(answerIfRemove): answer(deleteTryingMessage);
+    }
+
+
+
     public List<String> lockOrUnlockFile(ArrayList<String> messageAsArray, boolean lockOrUnlock) {
         FileSystemObj objToLock = checkPath(messageAsArray);
-        return ((objToLock != null) && (objToLock.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.File"))) ? answerLockForCurrentUser((File) objToLock, lockOrUnlock): answer("Bad path");
+        return ((objToLock != null) && (objToLock.getClass()==File.class)) ? answerLockForCurrentUser((File) objToLock, lockOrUnlock): answer("Bad path");
     }
 
     private List<String> answerLockForCurrentUser(File fileToLock, boolean lockOrUnlock) {
@@ -100,7 +120,7 @@ public class FileSystemController {
     public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
 
         FileSystemObj newCurrentFolder = checkPath(messageAsArray);
-        if ((newCurrentFolder) != null && (newCurrentFolder.getClass().toString().equalsIgnoreCase("class VirtualFileSystem.Folder")))  {
+        if ((newCurrentFolder) != null && (newCurrentFolder.getClass() ==Folder.class ))  {
             currentFolder = (Folder) newCurrentFolder;
             return answer ("Current directory " + newCurrentFolder.name );
         }   else return answer("Can not change directory");
