@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
@@ -14,46 +11,46 @@ import java.util.List;
  */
 public class User  extends Thread {
     FileSystemController fileSystemController = new FileSystemController();
-        Server server = null;
+    Server server = null;
 
-        // Сокет пользователя
-        private Socket socket = null;
-        // Входной канал
-        public BufferedReader bufferedReader = null;
-        // Выходной канал
-        public PrintStream printStream = null;
-        // Имя пользователя
-        public String userName = "";
-        // IP пользователя
-        public String userIp = "";
+    // Сокет пользователя
+    private Socket socket = null;
+    // Входной канал
+    public BufferedReader bufferedReader = null;
+    // Выходной канал
+    public PrintStream printStream = null;
+    // Имя пользователя
+    public String userName = "";
+    // IP пользователя
+    public String userIp = "";
 
 
-        // Конструктор
-        User(Server chatServer, Socket socket) throws IOException {
-            super("User Thread");
-            this.server = chatServer;
-            this.socket = socket;
+    // Конструктор
+    User(Server chatServer, Socket socket) throws IOException {
+        super("User Thread");
+        this.server = chatServer;
+        this.socket = socket;
 
-            start();
-        }
+        start();
+    }
 
-        // Обработка потока
-        @Override
-        public void run() {
-            try {
-                bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-                printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
+    // Обработка потока
+    @Override
+    public void run() {
+        try {
+            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+            printStream = new PrintStream(socket.getOutputStream(), true, "UTF-8");
 
-                // Предлагаем пользователю ввести свое имя
+            // Предлагаем пользователю ввести свое имя
 
-                // IP пользователя
+            // IP пользователя
 
-                userIp = socket.getInetAddress().getHostAddress();
-                // Получаем логин пользователя
-                userName = bufferedReader.readLine(); // блокируется пока не получит строки!
+            userIp = socket.getInetAddress().getHostAddress();
+            // Получаем логин пользователя
+            userName = bufferedReader.readLine(); // блокируется пока не получит строки!
 
-                server.GUI.printOnServer("New user " + userName + " try connect to Server");
-                synchronized (server)   {
+            server.GUI.printOnServer("New user " + userName + " try connect to Server");
+            synchronized (server)   {
                 for (User user : server.userList){
                     if (user.userName.equals(userName)) {
                         printStream.println("This UserName already engaged");
@@ -61,47 +58,58 @@ public class User  extends Thread {
                         return;
 
                     }
-                }      }
+                }
+            }
 
-                // Нотификация о подключении нового пользователя
-                server.onUserConnected(this);
-                // Помещаем пользователя в список пользователей
-               // server.userList.add(this);
-                // Отправляем всем сообщение
-               // server.sendChatMessage(null, "Подключен пользователь: "+userName);
-                printStream.println("Hello " + userName + "!");
-                // основной цикл обработки
-                while(true) {
-                    try {
-                        printStream.println("Type new command");
-                        // Читаем новое сообщение от пользователя
-                        String messageReceived = bufferedReader.readLine(); // блокируется пока не получит строки или null!
-                        if(messageReceived==null) {
-                            // Невозможно прочитать данные, пользователь отключился от сервера
-                            closeSocket();
-                            // Останавливаем бесконечный цикл
-                            break;
-                        }
-                        else if(!messageReceived.isEmpty()) {
-
-                            List<String> answer = fileSystemController.doCommand(messageReceived, this);
-                            for(String line : answer){
-                            printStream.println(line);
-
-                            }
-
-                            // Нотификация: получено сообщение
-                            server.onMessageReceived(this, messageReceived);
-                            // Отправляем всем сообщение
-                           // server.sendChatMessage(this, messageReceived);
-                        }
-                    } catch (Exception ex) {
+            // Нотификация о подключении нового пользователя
+            server.onUserConnected(this);
+            // Помещаем пользователя в список пользователей
+            // server.userList.add(this);
+            // Отправляем всем сообщение
+            // server.sendChatMessage(null, "Подключен пользователь: "+userName);
+            printStream.println("Hello " + userName + "!");
+            // основной цикл обработки
+            while(true) {
+                try {
+                    printStream.println("Type new command");
+                    // Читаем новое сообщение от пользователя
+                    String messageReceived = bufferedReader.readLine(); // блокируется пока не получит строки или null!
+                    if(messageReceived==null) {
+                        // Невозможно прочитать данные, пользователь отключился от сервера
                         closeSocket();
+                        // Останавливаем бесконечный цикл
                         break;
                     }
+                    else if(!messageReceived.isEmpty()) {
+                        if (messageReceived.equalsIgnoreCase("quit")) {
+                            closeSocket();
+                            break;
+                        }
+                        List<String> answer = fileSystemController.doCommand(messageReceived, this);
+                        for(String line : answer){
+                            printStream.println(line);
+
+                        }
+
+                        // Нотификация: получено сообщение
+                        server.onMessageReceived(this, messageReceived);
+                        // Отправляем всем сообщение
+                        // server.sendChatMessage(this, messageReceived);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    closeSocket();
+                    break;//To change body of catch statement use File | Settings | File Templates.
                 }
-            } catch(Exception ex) {}
+
+
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+    }
 
 
 
@@ -110,18 +118,20 @@ public class User  extends Thread {
     private void closeSocket() {
         try {
             // Нотификация: пользователь отключился
-            printStream.println("close");
+            printStream.println("quit");
             server.onUserDisconnected(this);
             // Отправляем всем сообщение
-         //   server.sendChatMessage(null, "Отключен пользователь: "+userName);
+            //   server.sendChatMessage(null, "Отключен пользователь: "+userName);
             // Удаляем пользователя со списка онлайн
-        //    server.userList.remove(this);
+            //    server.userList.remove(this);
             // Закрываем потоки
 
             bufferedReader.close();
             printStream.close();
             socket.close();
-        } catch (Exception ex) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void iMakeChanges(String changes) {

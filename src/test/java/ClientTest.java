@@ -23,7 +23,10 @@ public class ClientTest {
 
     @Test
     public void testConnect() throws Exception {
-        client.connect(new ConnectData(new String[]{"connect","169.254.119.145[:5463]","test"}));
+        client.connect(new ConnectData(new String[]{"connect","169.254.119.145:5463","test"}));
+
+        Assert.assertTrue(client.serverSocket.isConnected()) ;
+        client.connect(new ConnectData(new String[]{"connect","localhost:5463","test2"}));
 
         Assert.assertTrue(client.serverSocket.isConnected()) ;
     }

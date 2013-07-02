@@ -1,3 +1,5 @@
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,15 +17,19 @@ public class ConnectData {
     int port;
     String userName;
     public ConnectData(String [] command){
-        Pattern pattern = Pattern.compile("(.*)\\[\\:(.*)\\]");
+        Pattern pattern = Pattern.compile("(.*)\\:(.*)");
         if (command.length<3) return;
 
         Matcher matcher = pattern.matcher(command[SERVER_ADDRESS]);
 
         if (!matcher.matches()) return ;
 
+        try {
+            ip = matcher.group(1).equalsIgnoreCase("localhost") ?  InetAddress.getLocalHost().getHostAddress() :  matcher.group(1);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
-        ip = matcher.group(1);
        try {
             port = Integer.valueOf(matcher.group(2));
         }catch (Exception e){

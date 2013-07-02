@@ -16,9 +16,10 @@ import java.util.List;
 public class Client {
 
     ConsoleController consoleController;
-    protected Socket serverSocket;
+    protected volatile Socket serverSocket;
     private ConnectData connectData;
     PrintWriter output;
+    volatile BufferedReader  input;
     MessageReceiver messageReceiver;
     public  Client(){
         consoleController = new ConsoleController(this);
@@ -27,7 +28,7 @@ public class Client {
 
 
     public void connect(ConnectData connectData ) throws IOException {
-        if (messageReceiver != null){messageReceiver.interrupt();}
+        if (messageReceiver != null){output.println("quit");}
         this.connectData = connectData;
 
         serverSocket = new Socket(connectData.ip,connectData.port);
@@ -45,7 +46,11 @@ public class Client {
     }
 
     public List<String> messagingWithServer(String message) throws IOException {
-         if (serverSocket != null)    {
+        if(serverSocket == null)  {
+            consoleController.write("At the beginning connect to server!");
+            return null;
+        }
+        if (!serverSocket.isClosed())    {
         output = new PrintWriter(serverSocket.getOutputStream(), true);
         output.println(message);
          } else {
@@ -67,30 +72,44 @@ public class Client {
 
     }
 
+    public void disconnect() {
+        if (serverSocket.isConnected()){
+
+            output.println("quit");
+
+        }    else {
+            consoleController.write("At the beginning connect to server!");
+        }
+    }
+
 
     public class MessageReceiver extends Thread{
         @Override
         public void run() {
 
             try {
-
-                BufferedReader input = new
+                input = new
                         BufferedReader(new
                         InputStreamReader(serverSocket.getInputStream()));
                 String messageFromServer;
-                while ((messageFromServer = input.readLine())!=null) {
 
+                while (serverSocket.isConnected()) {
+
+                    messageFromServer = input.readLine();
                     consoleController.write("Server say: " + messageFromServer);
 
-                    if (messageFromServer.equalsIgnoreCase("close")) break;
+                    if (messageFromServer.equalsIgnoreCase("quit")) break;
 
                 }
 
                 output.close();
                 input.close();
-                serverSocket.close();
-            } catch (Exception ex) {
+                //serverSocket.close();
+                consoleController.write("You was disconnected from server");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
 
         }
     }

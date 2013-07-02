@@ -31,11 +31,13 @@ public class ConsoleController {
 
         try{
 
-            switch (command[0]){
+            switch (command[0].toLowerCase()){
                 case "connect":
                     connectClient(command);
                     break;
-
+                case "quit":
+                    disconnectClient();
+                    break;
                 default:
                     messagingWithServer(commandLine);
                     break;
@@ -49,6 +51,9 @@ public class ConsoleController {
 
     }
 
+    private void disconnectClient() {
+        client.disconnect();
+    }
 
 
     private void messagingWithServer(String command) {
