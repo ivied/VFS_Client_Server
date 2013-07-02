@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,9 +106,11 @@ public class Client {
                 input.close();
                 //serverSocket.close();
                 consoleController.write("You was disconnected from server");
-            } catch (IOException e) {
-                consoleController.write("Server close your connection");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+
         }
     }
 
