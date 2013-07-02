@@ -37,6 +37,13 @@ public class UserTest {
 
         user2 = new User(server,(new Socket()));
         user2.userName = "Tester2";
+        new Folder("C:\\folder1", FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder2", FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder1\\subFolder1", FileSystem.getInstance().ROOT_FOLDER);
+        new File("C:\\folder1\\subFolder1\\file", FileSystem.getInstance().ROOT_FOLDER);
+        new File("C:\\file1",FileSystem.getInstance().ROOT_FOLDER);
+        new File("C:\\file2",FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder1\\subFolder2", FileSystem.getInstance().ROOT_FOLDER);
     }
 
     @Test
@@ -82,7 +89,7 @@ public class UserTest {
         Assert.assertTrue(folder.name.equals("testRD"));
         answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
-        mustBe.add("Remove folder testRD");
+        mustBe.add("Remove testRD");
         assertTrue(answer.equals(mustBe));
 
 
@@ -99,7 +106,7 @@ public class UserTest {
           new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
          answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
-        mustBe.add("Remove folder testRD");
+        mustBe.add("Remove testRD");
         assertTrue(answer.equals(mustBe));
 
 
@@ -130,4 +137,43 @@ public class UserTest {
         assertTrue(answer.equals(mustBe));
     }
 
+    @Test
+    public void testDELTREE () throws IOException {
+        setUp();
+        answer = fileSystemController.doCommand("Del file1",user2);
+        mustBe.clear();
+        mustBe.add("Remove file1");
+        assertTrue(answer.equals(mustBe));
+
+        fileSystemController.doCommand("unlock folder1\\subFolder1\\file",user);
+        answer = fileSystemController.doCommand("Deltree folder1",user2);
+        mustBe.clear();
+        mustBe.add("Remove folder1");
+        assertTrue(answer.equals(mustBe));
+    }
+
+    @Test
+    public void testDELTREE2 () throws IOException {
+        setUp();
+        answer = fileSystemController.doCommand("Deltree file2",user2);
+        mustBe.clear();
+        mustBe.add("For remove file use DEL command");
+        assertTrue(answer.equals(mustBe));
+
+
+       fileSystemController.doCommand("lock folder1\\subFolder1\\file",user);
+
+        answer = fileSystemController.doCommand("Deltree folder1",user2);
+        mustBe.clear();
+        mustBe.add("Folder locked");
+        assertTrue(answer.equals(mustBe));
+
+        fileSystemController.doCommand("cd folder1\\subFolder1", user2);
+        answer = fileSystemController.doCommand("Del file",user2);
+        mustBe.clear();
+        mustBe.add("File locked");
+        assertTrue(answer.equals(mustBe));
+
+
+    }
 }

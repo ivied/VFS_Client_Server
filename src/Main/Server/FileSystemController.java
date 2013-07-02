@@ -21,16 +21,16 @@ public class FileSystemController {
 
     private static final FileSystem fileSystem = FileSystem.getInstance();
     private User user;
-
+    Commands command;
     public enum Commands {
-        MD, PING, CD, MF, LOCK, UNLOCK, RD
+        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE
     }
 
     public List<String> doCommand(String messageReceived, User user) {
         this.user = user;
         try{
             ArrayList<String> messageAsArray = new ArrayList<String>(Arrays.asList( messageReceived.split(" ")));
-            Commands command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
+            command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
             messageAsArray.remove(0);
 
             synchronized (fileSystem)  {
@@ -40,7 +40,9 @@ public class FileSystemController {
                     case MF: return makeFile(messageAsArray);
                     case LOCK: return lockOrUnlockFile(messageAsArray, LOCK);
                     case UNLOCK: return lockOrUnlockFile(messageAsArray, UNLOCK);
-                    case RD: return removeFolder(messageAsArray);
+                    case RD: return removeObj(messageAsArray);
+                    case DEL: return removeObj(messageAsArray);
+                    case DELTREE: return removeObj(messageAsArray);
                     case PING: return answer("pong");
                     default:  return answer("Unhandle command");
 
@@ -54,19 +56,42 @@ public class FileSystemController {
 
     }
 
-    private List<String> removeFolder(ArrayList<String> messageAsArray) {
+
+
+    private List<String> removeObj(ArrayList<String> messageAsArray) {
         FileSystemObj objToRemove = checkPath(messageAsArray);
         if (objToRemove == null)  return answer("Bad path");
-        if (objToRemove.getClass() != Folder.class)  return answer("For remove file use DEL command") ;
-        Folder folderToDelete = (Folder) objToRemove;
-        for (FileSystemObj fileSystemObj: folderToDelete.folderList) {
-            if (fileSystemObj.getClass() == Folder.class) return answer("Deleting Folder consist subFolders");  }
-        return (folderToDelete != currentFolder ) ? answerRemovingFolder(folderToDelete)  : answer("Bad path");
+        return removingDependenciesFromCommand( objToRemove);
+
 
     }
 
-    private List<String> answerRemovingFolder(FileSystemObj objToRemove) {
-        String answerIfRemove = "Remove folder " + objToRemove.name;
+    private List<String> removingDependenciesFromCommand( FileSystemObj objToRemove) {
+        switch (command){
+            case RD:
+            case DELTREE:
+                if (objToRemove.getClass() != Folder.class)  return answer("For remove file use DEL command") ;
+                Folder folderToDelete = (Folder) objToRemove;
+                List<String> answer =  answerIfFolderHaveSubfolders(folderToDelete);
+                if(answer !=  null) return answer;
+                return (folderToDelete != currentFolder ) ? answerRemovingObj(folderToDelete)  : answer("Bad path");
+            case DEL:
+
+                return  (objToRemove.getClass() == File.class) ? answerRemovingObj(objToRemove) :   answer("For remove folder use RD or DELTREE command") ;
+            default:
+                return null;
+        }
+    }
+
+    private List<String> answerIfFolderHaveSubfolders( Folder folderToDelete) {
+        if(command == Commands.RD) for (FileSystemObj fileSystemObj: folderToDelete.folderList) {
+            if (fileSystemObj.getClass() == Folder.class) return answer("Deleting Folder consist subFolders. Try DELTREE command");
+        }
+        return null;
+    }
+
+    private List<String> answerRemovingObj(FileSystemObj objToRemove) {
+        String answerIfRemove = "Remove " + objToRemove.name;
         String deleteTryingMessage = FileSystem.getInstance().deleteObject(objToRemove);
         return deleteTryingMessage.equalsIgnoreCase(answerIfRemove)? answerWithFileSystemChanges(answerIfRemove): answer(deleteTryingMessage);
     }

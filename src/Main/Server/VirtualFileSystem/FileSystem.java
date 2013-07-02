@@ -29,18 +29,18 @@ public class FileSystem  {
     }
 
     private String deleteFolder(Folder folderToRemove) {
-         return locksCheck(folderToRemove)  ? "Folder locked" : answerRemoveFolder(folderToRemove);
+         return locksCheck(folderToRemove)  ? "Folder locked" : answerRemoveObj(folderToRemove);
 
     }
 
-    private String answerRemoveFolder(Folder folderToRemove) {
+    private String answerRemoveObj(FileSystemObj folderToRemove) {
         folderToRemove.trueParentFolder.folderList.remove(folderToRemove);
-        return "Remove folder " + folderToRemove.name;
+        return "Remove " + folderToRemove.name;
     }
 
     private boolean locksCheck(Folder folderToRemove) {
         for (FileSystemObj fileSystemObj : folderToRemove.folderList){
-            boolean objLock =  (fileSystemObj.getClass() == File.class) ? !((File) fileSystemObj).users_locks.isEmpty(): locksCheck(folderToRemove);
+            boolean objLock =  (fileSystemObj.getClass() == File.class) ? !((File) fileSystemObj).users_locks.isEmpty(): locksCheck((Folder)fileSystemObj);
             if (objLock) return true;
         }
         return false;
@@ -48,11 +48,8 @@ public class FileSystem  {
 
     private String deleteFile(File fileToRemove) {
 
-        return fileToRemove.users_locks.isEmpty() ? answerDeleteFile(fileToRemove) : "File locked";
+        return fileToRemove.users_locks.isEmpty() ? answerRemoveObj(fileToRemove) : "File locked";
     }
 
-    private String answerDeleteFile(File fileToRemove) {
-        fileToRemove.trueParentFolder.folderList.remove(fileToRemove);
-        return "Remove file " + fileToRemove.name;  //To change body of created methods use File | Settings | File Templates.
-    }
+
 }
