@@ -1,8 +1,6 @@
 package VirtualFileSystem;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,8 +12,8 @@ import java.util.List;
 abstract public class FileSystemObj {
    // protected final static Folder ROOT_FOLDER = new Folder ("C:", null);
     public String name;
-    private Folder parentFolder;
-    public Folder trueParentFolder;
+
+    public Folder parentFolder;
     public boolean exist = false;
 
     public FileSystemObj(String path,Folder currentFolder){
@@ -26,11 +24,12 @@ abstract public class FileSystemObj {
 
         if (name.equalsIgnoreCase("C:")) return;
 
+        FileSystemObjWithFlag newObj = FileSystem.getInstance().checkPath(parentFoldersName, currentFolder);
+        if (newObj.fileSystemObj==null){
+            parentFolder = newObj.parentFolder;
+            FileSystem.getInstance().addObjWithLexicOrder(parentFolder, this);
+           // parentFolder.folderList.add(this);
 
-        if (checkPath(parentFoldersName, currentFolder)==null){
-
-            parentFolder.folderList.add(this);
-            trueParentFolder = parentFolder;
             exist = true;
         }
 
@@ -39,44 +38,6 @@ abstract public class FileSystemObj {
 
 
 
-    public FileSystemObjWithFlag checkPath(List<String> parentFoldersName, Folder startFolder) {
-
-        if (parentFoldersName.get(0).equalsIgnoreCase("C:")) {
-            startFolder =   FileSystem.getInstance().ROOT_FOLDER ;
-
-        }else{
-
-            parentFoldersName.add(0, startFolder.name) ;
-        }
-        return checkAllParentFolders( parentFoldersName, startFolder);
-
-    }
-
-    private FileSystemObjWithFlag checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
-        Folder savedFolder = startFolder;
-        for (int subObjNumber = 1; subObjNumber != parentFoldersName.size(); subObjNumber++ ){
-            String subObjName = parentFoldersName.get(subObjNumber);
-            this.parentFolder = startFolder;
-
-            FileSystemObj fileSystemObj = startFolder.checkObjExist(startFolder.folderList, subObjName);
-
-            if (fileSystemObj != null && fileSystemObj.getClass() == File.class)return new FileSystemObjWithFlag( fileSystemObj, FileSystemObjWithFlag.FILE);
-            startFolder = (Folder) fileSystemObj;
-            if ((startFolder == null)&&(subObjNumber == parentFoldersName.size()-1)) return null;
-            if (startFolder == null ) return new FileSystemObjWithFlag( savedFolder, FileSystemObjWithFlag.CURRENT_FOLDER);
-
-        }
-        return new FileSystemObjWithFlag( startFolder, FileSystemObjWithFlag.NEW_FOLDER);
-    }
-
-
-    protected FileSystemObj checkObjExist(ArrayList<FileSystemObj> reviseFolder, String subFolderName) {
-        for(FileSystemObj fileSystemObj : reviseFolder) {
-            if( fileSystemObj.name.equalsIgnoreCase(subFolderName)  )
-                return  fileSystemObj;
-        }
-        return null;
-    }
 
     protected List<String> getParentFoldersName(String path) {
         return new ArrayList(Arrays.asList(path.split("\\\\")));

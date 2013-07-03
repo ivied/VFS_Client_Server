@@ -20,7 +20,7 @@ public class FileSystemController {
     private User user;
     Commands command;
     public enum Commands {
-        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE, COPY, MOVE
+        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE, COPY, MOVE, PRINT
     }
 
     public List<String> doCommand(String messageReceived, User user) {
@@ -42,6 +42,7 @@ public class FileSystemController {
                     case DELTREE: return removeObj(messageAsArray);
                     case COPY: return copyOrMoveObj(messageAsArray);
                     case MOVE: return copyOrMoveObj(messageAsArray);
+                    case PRINT: return printFileSystem();
                     case PING: return answer("pong");
 
                     default:  return answer("Unhandle command");
@@ -56,10 +57,19 @@ public class FileSystemController {
 
     }
 
+    private List<String> printFileSystem() {
+        List<String> structure =  FileSystem.getInstance().printStructure();
+        for (String line : structure){
+            answer(line);
+        }
+        return  structure;
+
+    }
+
     private List<String> copyOrMoveObj(ArrayList<String> messageAsArray) {
         FileSystemObjWithFlag objToCopy = checkPath(messageAsArray.get(0));
         FileSystemObjWithFlag objToPaste = checkPath(messageAsArray.get(1));
-        if((objToCopy == null) || (objToPaste ==  null) ) return answer("Bad path") ;
+        if((objToCopy.fileSystemObj == null) || (objToPaste.fileSystemObj ==  null) ) return answer("Bad path") ;
         if(command == Commands.MOVE) {
             List<String> ifRemoveAnswer = new ArrayList<>() ;
             ifRemoveAnswer.add("Remove " + objToCopy.fileSystemObj.name);
@@ -67,8 +77,8 @@ public class FileSystemController {
             if (!removeObj(messageAsArray).equals(ifRemoveAnswer)) return answer("Cant move this");
         }
         if ((objToPaste.flag != FileSystemObjWithFlag.NEW_FOLDER) || ((objToCopy.flag != FileSystemObjWithFlag.NEW_FOLDER)&&((objToCopy.flag != FileSystemObjWithFlag.FILE)))) return answer("Bad path");
-        ((Folder)objToPaste.fileSystemObj).folderList.add(objToCopy.fileSystemObj);
-        return answerWithFileSystemChanges("Copy " + objToCopy.fileSystemObj.name + " to " +objToPaste.fileSystemObj.name);
+        fileSystem.addObjWithLexicOrder((Folder) objToPaste.fileSystemObj, objToCopy.fileSystemObj);
+        return answerWithFileSystemChanges("Copy " + objToCopy.fileSystemObj.name + " to " + objToPaste.fileSystemObj.name);
     }
 
 
@@ -142,7 +152,7 @@ public class FileSystemController {
     }
 
     private FileSystemObjWithFlag checkPath(String fileSystemObjPath) {
-        return FileSystem.getInstance().ROOT_FOLDER.checkPath(new ArrayList(Arrays.asList(fileSystemObjPath.split("\\\\"))), currentFolder);
+        return FileSystem.getInstance().checkPath(new ArrayList(Arrays.asList(fileSystemObjPath.split("\\\\"))), currentFolder);
     }
 
     private List<String> makeFile(ArrayList<String> messageAsArray) {
@@ -159,7 +169,7 @@ public class FileSystemController {
 
     public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
         FileSystemObjWithFlag fileSystemObjWithFlag = checkPath(messageAsArray.get(0));
-        if (fileSystemObjWithFlag == null )return  answer("Can not change directory");
+        if (fileSystemObjWithFlag.fileSystemObj == null )return  answer("Can not change directory");
         FileSystemObj newCurrentFolder = fileSystemObjWithFlag.fileSystemObj;
         if ( (newCurrentFolder.getClass() == Folder.class ))  {
             currentFolder = (Folder) newCurrentFolder;

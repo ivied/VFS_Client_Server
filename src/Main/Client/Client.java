@@ -106,8 +106,9 @@ public class Client {
                 input.close();
                 //serverSocket.close();
                 consoleController.write("You was disconnected from server");
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+
+            consoleController.write("Server close your connection");
             }
 
 
