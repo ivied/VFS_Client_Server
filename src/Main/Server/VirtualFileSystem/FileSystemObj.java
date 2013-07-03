@@ -38,7 +38,8 @@ abstract public class FileSystemObj {
     }
 
 
-    public FileSystemObj checkPath(List<String> parentFoldersName, Folder startFolder) {
+
+    public FileSystemObjWithFlag checkPath(List<String> parentFoldersName, Folder startFolder) {
 
         if (parentFoldersName.get(0).equalsIgnoreCase("C:")) {
             startFolder =   FileSystem.getInstance().ROOT_FOLDER ;
@@ -51,7 +52,7 @@ abstract public class FileSystemObj {
 
     }
 
-    private FileSystemObj checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
+    private FileSystemObjWithFlag checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
         Folder savedFolder = startFolder;
         for (int subObjNumber = 1; subObjNumber != parentFoldersName.size(); subObjNumber++ ){
             String subObjName = parentFoldersName.get(subObjNumber);
@@ -59,13 +60,13 @@ abstract public class FileSystemObj {
 
             FileSystemObj fileSystemObj = startFolder.checkObjExist(startFolder.folderList, subObjName);
 
-            if (fileSystemObj != null && fileSystemObj.getClass() == File.class)return fileSystemObj;
+            if (fileSystemObj != null && fileSystemObj.getClass() == File.class)return new FileSystemObjWithFlag( fileSystemObj, FileSystemObjWithFlag.FILE);
             startFolder = (Folder) fileSystemObj;
             if ((startFolder == null)&&(subObjNumber == parentFoldersName.size()-1)) return null;
-            if (startFolder == null ) return savedFolder;
+            if (startFolder == null ) return new FileSystemObjWithFlag( savedFolder, FileSystemObjWithFlag.CURRENT_FOLDER);
 
         }
-        return startFolder;
+        return new FileSystemObjWithFlag( startFolder, FileSystemObjWithFlag.NEW_FOLDER);
     }
 
 
@@ -85,4 +86,6 @@ abstract public class FileSystemObj {
     protected void setName(List<String> parentFoldersName) {
         name = parentFoldersName.get(parentFoldersName.size()-1);
     }
+
+
 }

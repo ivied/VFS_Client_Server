@@ -116,7 +116,7 @@ public class UserTest {
         new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER) ;
         answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
-        mustBe.add("Deleting Folder consist subFolders");
+        mustBe.add("Deleting Folder consist subFolders. Try use DELTREE command");
         assertTrue(answer.equals(mustBe));
 
 
@@ -174,6 +174,26 @@ public class UserTest {
         mustBe.add("File locked");
         assertTrue(answer.equals(mustBe));
 
+        fileSystemController.doCommand("cd C:", user2);
+        answer =fileSystemController.doCommand("copy folder1\\subFolder1 c:", user2);
+        mustBe.clear();
+        mustBe.add("Copy subFolder1 to C:");
+        assertTrue(answer.equals(mustBe));
+
+
+        answer =fileSystemController.doCommand("move folder1\\subFolder1 c:", user2);
+        mustBe.clear();
+        mustBe.add("Cant move this");
+        assertTrue(answer.equals(mustBe));
+
+
+
+        fileSystemController.doCommand("unlock folder1\\subFolder1\\file",user);
+
+        answer =fileSystemController.doCommand("move folder1\\subFolder1 c:", user2);
+        mustBe.clear();
+        mustBe.add("Copy subFolder1 to C:");
+        assertTrue(answer.equals(mustBe));
 
     }
 }

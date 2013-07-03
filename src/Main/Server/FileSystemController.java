@@ -1,7 +1,4 @@
-import VirtualFileSystem.File;
-import VirtualFileSystem.FileSystem;
-import VirtualFileSystem.FileSystemObj;
-import VirtualFileSystem.Folder;
+import VirtualFileSystem.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +20,7 @@ public class FileSystemController {
     private User user;
     Commands command;
     public enum Commands {
-        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE
+        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE, COPY, MOVE
     }
 
     public List<String> doCommand(String messageReceived, User user) {
@@ -43,7 +40,10 @@ public class FileSystemController {
                     case RD: return removeObj(messageAsArray);
                     case DEL: return removeObj(messageAsArray);
                     case DELTREE: return removeObj(messageAsArray);
+                    case COPY: return copyOrMoveObj(messageAsArray);
+                    case MOVE: return copyOrMoveObj(messageAsArray);
                     case PING: return answer("pong");
+
                     default:  return answer("Unhandle command");
 
                 }
@@ -56,10 +56,24 @@ public class FileSystemController {
 
     }
 
+    private List<String> copyOrMoveObj(ArrayList<String> messageAsArray) {
+        FileSystemObjWithFlag objToCopy = checkPath(messageAsArray.get(0));
+        FileSystemObjWithFlag objToPaste = checkPath(messageAsArray.get(1));
+        if((objToCopy == null) || (objToPaste ==  null) ) return answer("Bad path") ;
+        if(command == Commands.MOVE) {
+            List<String> ifRemoveAnswer = new ArrayList<>() ;
+            ifRemoveAnswer.add("Remove " + objToCopy.fileSystemObj.name);
+            command = (objToCopy.fileSystemObj.getClass() == File.class)? Commands.DEL : Commands.DELTREE;
+            if (!removeObj(messageAsArray).equals(ifRemoveAnswer)) return answer("Cant move this");
+        }
+        if ((objToPaste.flag != FileSystemObjWithFlag.NEW_FOLDER) || ((objToCopy.flag != FileSystemObjWithFlag.NEW_FOLDER)&&((objToCopy.flag != FileSystemObjWithFlag.FILE)))) return answer("Bad path");
+        ((Folder)objToPaste.fileSystemObj).folderList.add(objToCopy.fileSystemObj);
+        return answerWithFileSystemChanges("Copy " + objToCopy.fileSystemObj.name + " to " +objToPaste.fileSystemObj.name);
+    }
 
 
     private List<String> removeObj(ArrayList<String> messageAsArray) {
-        FileSystemObj objToRemove = checkPath(messageAsArray);
+        FileSystemObj objToRemove = checkPath(messageAsArray.get(0)).fileSystemObj;
         if (objToRemove == null)  return answer("Bad path");
         return removingDependenciesFromCommand( objToRemove);
 
@@ -72,6 +86,7 @@ public class FileSystemController {
             case DELTREE:
                 if (objToRemove.getClass() != Folder.class)  return answer("For remove file use DEL command") ;
                 Folder folderToDelete = (Folder) objToRemove;
+
                 List<String> answer =  answerIfFolderHaveSubfolders(folderToDelete);
                 if(answer !=  null) return answer;
                 return (folderToDelete != currentFolder ) ? answerRemovingObj(folderToDelete)  : answer("Bad path");
@@ -85,7 +100,7 @@ public class FileSystemController {
 
     private List<String> answerIfFolderHaveSubfolders( Folder folderToDelete) {
         if(command == Commands.RD) for (FileSystemObj fileSystemObj: folderToDelete.folderList) {
-            if (fileSystemObj.getClass() == Folder.class) return answer("Deleting Folder consist subFolders. Try DELTREE command");
+            if (fileSystemObj.getClass() == Folder.class) return answer("Deleting Folder consist subFolders. Try use DELTREE command");
         }
         return null;
     }
@@ -99,7 +114,7 @@ public class FileSystemController {
 
 
     public List<String> lockOrUnlockFile(ArrayList<String> messageAsArray, boolean lockOrUnlock) {
-        FileSystemObj objToLock = checkPath(messageAsArray);
+        FileSystemObj objToLock = checkPath(messageAsArray.get(0)).fileSystemObj;
         return ((objToLock != null) && (objToLock.getClass()==File.class)) ? answerLockForCurrentUser((File) objToLock, lockOrUnlock): answer("Bad path");
     }
 
@@ -126,12 +141,12 @@ public class FileSystemController {
         return answerWithFileSystemChanges(changes);
     }
 
-    private FileSystemObj checkPath(ArrayList<String> messageAsArray) {
-        return currentFolder.checkPath(new ArrayList(Arrays.asList(messageAsArray.get(0).split("\\\\"))), currentFolder);
+    private FileSystemObjWithFlag checkPath(String fileSystemObjPath) {
+        return FileSystem.getInstance().ROOT_FOLDER.checkPath(new ArrayList(Arrays.asList(fileSystemObjPath.split("\\\\"))), currentFolder);
     }
 
     private List<String> makeFile(ArrayList<String> messageAsArray) {
-        File file = new File(messageAsArray.get(0), currentFolder);
+        File file = FileSystem.getInstance().createFile(messageAsArray, currentFolder);
         return file.exist? answerWithFileSystemChanges("Create " + file.name): answer("Bad path");  //To change body of created methods use File | Settings | File Templates.
     }
 
@@ -143,9 +158,10 @@ public class FileSystemController {
 
 
     public List<String> changeCurrentFolder(ArrayList<String> messageAsArray) {
-
-        FileSystemObj newCurrentFolder = checkPath(messageAsArray);
-        if ((newCurrentFolder) != null && (newCurrentFolder.getClass() ==Folder.class ))  {
+        FileSystemObjWithFlag fileSystemObjWithFlag = checkPath(messageAsArray.get(0));
+        if (fileSystemObjWithFlag == null )return  answer("Can not change directory");
+        FileSystemObj newCurrentFolder = fileSystemObjWithFlag.fileSystemObj;
+        if ( (newCurrentFolder.getClass() == Folder.class ))  {
             currentFolder = (Folder) newCurrentFolder;
             return answer ("Current directory " + newCurrentFolder.name );
         }   else return answer("Can not change directory");
@@ -153,7 +169,7 @@ public class FileSystemController {
 
     private List<String> createFolder(ArrayList<String> messageAsArray) {
 
-        Folder folder = new Folder(messageAsArray.get(0), currentFolder);
+        Folder folder = FileSystem.getInstance().createFolder(messageAsArray, currentFolder);
 
         return folder.exist? answerWithFileSystemChanges("Create " + folder.name): answer("Bad path");
 

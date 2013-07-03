@@ -1,5 +1,8 @@
 package VirtualFileSystem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Serv
@@ -21,6 +24,18 @@ public class FileSystem  {
             instance = new FileSystem();
         }
         return instance;
+    }
+
+    public Folder createFolder(ArrayList<String> messageAsArray, Folder currentFolder) {
+
+        return new Folder(messageAsArray.get(0), currentFolder);
+
+    }
+
+    public File createFile(ArrayList<String> messageAsArray, Folder currentFolder) {
+
+        return new File(messageAsArray.get(0), currentFolder);
+
     }
 
     public String deleteObject(FileSystemObj objToRemove) {
