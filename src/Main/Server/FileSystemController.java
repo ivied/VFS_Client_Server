@@ -155,6 +155,7 @@ public class FileSystemController {
         switch (command){
             case RD:
             case DELTREE:
+
                 if (objToRemove.isFile())  return answer("For remove file use DEL command") ;
                 Folder folderToDelete = (Folder) objToRemove;
 
