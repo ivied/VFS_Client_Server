@@ -50,6 +50,8 @@ abstract public class FileSystemObj {
 
     }
 
+
+
     public boolean isFile (){
         return this.getClass() == File.class;
     }

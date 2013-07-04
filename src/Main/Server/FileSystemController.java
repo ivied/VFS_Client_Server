@@ -89,9 +89,11 @@ public class FileSystemController {
             if (!removeObj(messageAsArray).equals(ifRemoveAnswer)) return answer("Cant move this");
         }
         if (!objToPaste.isFlagingNew() || (!objToCopy.isFlagingNew() && !objToCopy.isFlagingFile())) return answer("Bad path");
-        fileSystem.addObjWithLexicOrder((Folder) objToPaste, objToCopy);
+        copyObj(messageAsArray, objToCopy);
         return answerWithFileSystemChanges("Copy " + objToCopy.name + " to " + objToPaste.name);
     }
+
+
 
 
     private List<String> removeObj(ArrayList<String> messageAsArray) {
@@ -115,6 +117,24 @@ public class FileSystemController {
         return folder.exist? answerWithFileSystemChanges("Create " + folder.name): answer("Bad path");
 
     }
+
+    private FileSystemObj copyObj(ArrayList<String> messageAsArray, FileSystemObj objToCopy) {
+        messageAsArray.add(0, messageAsArray.get(1).concat("\\" + objToCopy.name));
+        return (objToCopy.isFile()) ?  copyFile(messageAsArray, (File) objToCopy) : copyFolder(messageAsArray, (Folder) objToCopy);
+    }
+
+    private Folder copyFolder(ArrayList<String> messageAsArray, Folder objToCopy) {
+        Folder folder = fileSystem.createFolder(messageAsArray, currentFolder);
+        folder.folderList = new ArrayList<>((objToCopy).folderList);
+        return folder;
+    }
+
+    private File copyFile(ArrayList<String> messageAsArray, File objToCopy) {
+        File file = fileSystem.createFile(messageAsArray, currentFolder);
+        file.users_locks = new ArrayList<>((objToCopy).users_locks);
+        return  file;
+    }
+
 
     private List<String> answerWithFileSystemChanges(String changes) {
         user.iMakeChanges(changes);

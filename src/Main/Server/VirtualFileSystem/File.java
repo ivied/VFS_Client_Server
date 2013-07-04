@@ -15,6 +15,7 @@ public class File extends FileSystemObj {
         super(path, currentFolder);
     }
 
+
     public boolean isLock () {
         return !users_locks.isEmpty();
     }

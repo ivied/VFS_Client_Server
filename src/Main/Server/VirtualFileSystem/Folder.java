@@ -17,6 +17,8 @@ public class Folder extends FileSystemObj {
         super(path, currentFolder);
     }
 
+
+
     public boolean isClear(){
         return folderList.isEmpty();
     }

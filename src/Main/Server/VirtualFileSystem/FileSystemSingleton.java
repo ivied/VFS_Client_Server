@@ -33,7 +33,9 @@ public class FileSystemSingleton {
      * Значение флага зависит от того чем закончилась проверка пути
      */
     public FileSystemObj checkPath(List<String> parentFoldersName, Folder startFolder) {
+
         List<String> parentsName = new ArrayList<>(parentFoldersName);
+
         startFolder = correctionPathOrCurrentFolder(startFolder, parentsName);
         return checkAllParentFolders( parentsName, startFolder);
 
@@ -72,7 +74,7 @@ public class FileSystemSingleton {
     }
 
     /**
-     * Добавляет элемент в файловую систему, с учетом лексикографического порядка
+     * Добавляет элемент в файловую систему
      */
     public void addObjWithLexicOrder(Folder parentFolder, FileSystemObj objToAdd) {
         if (parentFolder.isClear()) {
@@ -95,9 +97,9 @@ public class FileSystemSingleton {
     }
 
     private FileSystemObj checkAllParentFolders(List<String> parentFoldersName, Folder startFolder) {
-
-
         Folder savedFolder = startFolder;
+
+
         for (int subObjNumber = 1; subObjNumber != parentFoldersName.size(); subObjNumber++ ){
             String subObjName = parentFoldersName.get(subObjNumber);
 
