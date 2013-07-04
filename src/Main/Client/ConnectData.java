@@ -4,11 +4,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Класс отвечает за генерацию данных для подключения к серверу
  * Created with IntelliJ IDEA.
  * User: Serv
- * Date: 27.06.13
- * Time: 22:54
- * To change this template use File | Settings | File Templates.
  */
 public class ConnectData {
     private static final int SERVER_ADDRESS = 1;
@@ -16,6 +14,7 @@ public class ConnectData {
     String ip;
     int port;
     String userName;
+
     public ConnectData(String [] command){
         Pattern pattern = Pattern.compile("(.*)\\:(.*)");
         if (command.length<3) return;
@@ -27,7 +26,7 @@ public class ConnectData {
         try {
             ip = matcher.group(1).equalsIgnoreCase("localhost") ?  InetAddress.getLocalHost().getHostAddress() :  matcher.group(1);
         } catch (UnknownHostException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
        try {

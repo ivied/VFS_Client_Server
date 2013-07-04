@@ -5,11 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Класс обеспечивающий папки файловой системы
  * Created with IntelliJ IDEA.
  * User: Serv
- * Date: 29.06.13
- * Time: 1:30
- * To change this template use File | Settings | File Templates.
  */
 public class Folder extends FileSystemObj {
 
@@ -19,25 +17,8 @@ public class Folder extends FileSystemObj {
         super(path, currentFolder);
     }
 
-
-    // protected  Folder currentDirectory = ROOT_FOLDER;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   /* public ArrayList<FileSystemObj> getFolderList (){
-         return folderList;
-    }*/
-
+    public boolean isClear(){
+        return folderList.isEmpty();
+    }
 
 }

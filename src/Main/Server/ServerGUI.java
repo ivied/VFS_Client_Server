@@ -3,83 +3,90 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Класс реализует графический интефейс сервера
+ * Класс для запуска сервера
  * Created with IntelliJ IDEA.
  * User: Serv
- * Date: 27.06.13
- * Time: 15:05
- * To change this template use File | Settings | File Templates.
  */
 public class ServerGUI extends JFrame implements GUIListener {
     private static final String CONFIG_FILE="ServerConfig.txt";
     private static final String PORT = "port";
     private static final String IP = "ip";
+    private static final String HEIGHT = "height";
+    public static final String WIDTH = "width";
+
     Server server;
     static Map<String,String> config = new HashMap<String, String>();
     private JTextArea textArea = new JTextArea(6, 20);
-    private JButton startButton = new JButton("Start Server");
 
+    /**
+     * Метод считывает конфигурации сервера и формирует  графический интерфейс
+     *
+     */
+    public static void main(String args[]) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                getConfig();
+                ServerGUI frame = new ServerGUI();
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frame.setTitle("File Server");
+                try{
+
+                    frame.setSize(Integer.parseInt(config.get(WIDTH)), Integer.parseInt(config.get(HEIGHT)));
+                } catch (NumberFormatException e)  {
+                    frame.setSize(800, 500);
+                }
+
+                frame.setLocationByPlatform(true);
+                frame.setVisible(true);
+            }
+        });
+    }
+
+    /**
+     * Конструктор класса запускет сервер и графический интерфейс
+     */
     public ServerGUI() {
         super();
         setTitle("Server");
         setLayout(new BorderLayout());
         server = new Server();
-        // Регистрируемся в качестве слушателя событий
         server.GUIRegistration(this);
         initComponents();
     }
 
-    private void initComponents() {
-        startButton.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent e) {
-                // Запускаем сервак на порту 5463
-                System.out.println(config.get(PORT));
-                server.init(config.get(IP),Integer.parseInt(config.get(PORT)));
-            }
-
-        });
-
-        JScrollPane scroll = new JScrollPane(textArea);
-
-        add(scroll, BorderLayout.CENTER);
-        add(startButton, BorderLayout.EAST);
-
-    }
-
-
-    /******************** методы интерфейса ServerListener *******************/
 
     public void serverStarted(String ip, int port) {
-        //Отображаем в компоненте
         textArea.append("\nСервер запущен по адресу: "+ip+" порт: "+port);
     }
 
     public void serverStopped() {
-        //Отображаем в компоненте
         textArea.append("\nНевозможно запустить сервер ");
     }
 
     public void onUserConnected(User user) {
-        //Отображаем в компоненте
+
         textArea.append("\nПодключен новый пользователь: "+user.userName);
     }
 
     public void onUserDisconnected(User user) {
-        //Отображаем в компоненте
+
         textArea.append("\nПользователь отключился: "+user.userName);
     }
 
     public void onMessageReceived(User user, String message) {
-        //Отображаем в компоненте новое сообщение
         textArea.append("\n<"+user.userName+"> "+message);
-        // Пишем данные в файл...
     }
 
 
@@ -88,48 +95,23 @@ public class ServerGUI extends JFrame implements GUIListener {
     }
 
 
-    /******************** запуск приложения *******************/
-
-    public static void main(String args[]) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                getConfig();
-                ServerGUI frame = new ServerGUI();
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setTitle("File Server");
-                frame.setSize(800, 500);
-                frame.setLocationByPlatform(true);
-                frame.setVisible(true);
-            }
-        });
-    }
-
     private static void getConfig() {
         String programDir = System.getProperty("user.dir");
         ArrayList<String> list = new ArrayList<String>();
         File file = new File(programDir + "/" +CONFIG_FILE);
-        BufferedReader reader = null;
+        BufferedReader reader;
 
         try {
             reader = new BufferedReader(new FileReader(file));
-            String text = null;
+            String text;
 
             while ((text = reader.readLine()) != null) {
                 addConfigParameter(text);
                 list.add(text);
-                System.out.println(text);
+
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-            }
         }
     }
 
@@ -141,5 +123,23 @@ public class ServerGUI extends JFrame implements GUIListener {
 
         }
     }
+
+    private void initComponents() {
+        System.out.println(config.get(PORT));
+        try{
+
+            server.init(config.get(IP),Integer.parseInt(config.get(PORT)));
+        } catch (NumberFormatException e)  {
+            try {
+                server.init(InetAddress.getLocalHost().getHostAddress(),5463);
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            }
+        }
+        JScrollPane scroll = new JScrollPane(textArea);
+        add(scroll, BorderLayout.CENTER);
+
+    }
+
 
 }

@@ -1,5 +1,5 @@
 import VirtualFileSystem.File;
-import VirtualFileSystem.FileSystem;
+import VirtualFileSystem.FileSystemSingleton;
 import VirtualFileSystem.Folder;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -37,13 +37,13 @@ public class UserTest {
 
         user2 = new User(server,(new Socket()));
         user2.userName = "Tester2";
-        new Folder("C:\\folder1", FileSystem.getInstance().ROOT_FOLDER);
-        new Folder("C:\\folder2", FileSystem.getInstance().ROOT_FOLDER);
-        new Folder("C:\\folder1\\subFolder1", FileSystem.getInstance().ROOT_FOLDER);
-        new File("C:\\folder1\\subFolder1\\file", FileSystem.getInstance().ROOT_FOLDER);
-        new File("C:\\file1",FileSystem.getInstance().ROOT_FOLDER);
-        new File("C:\\file2",FileSystem.getInstance().ROOT_FOLDER);
-        new Folder("C:\\folder1\\subFolder2", FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder1", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder2", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder1\\subFolder1", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new File("C:\\folder1\\subFolder1\\file", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new File("C:\\file1", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new File("C:\\file2", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new Folder("C:\\folder1\\subFolder2", FileSystemSingleton.getInstance().ROOT_FOLDER);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class UserTest {
 
     @Test
     public void userRDTests () throws IOException {
-        Folder folder = new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
+        Folder folder = new Folder("C:\\testRD", FileSystemSingleton.getInstance().ROOT_FOLDER);
         Assert.assertTrue(folder.name.equals("testRD"));
         answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
@@ -94,7 +94,7 @@ public class UserTest {
 
 
 
-        File file= new File ("testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+        File file= new File ("testRD.RD", FileSystemSingleton.getInstance().ROOT_FOLDER);
         Assert.assertTrue(file.exist);
         answer = fileSystemController.doCommand("rd testRD.RD",user2);
         mustBe.clear();
@@ -102,8 +102,8 @@ public class UserTest {
         assertTrue(answer.equals(mustBe));
 
 
-        new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
-          new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+        new Folder("C:\\testRD", FileSystemSingleton.getInstance().ROOT_FOLDER);
+          new File ("testRD\\testRD.RD", FileSystemSingleton.getInstance().ROOT_FOLDER);
          answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
         mustBe.add("Remove testRD");
@@ -111,9 +111,9 @@ public class UserTest {
 
 
 
-        new Folder("C:\\testRD", FileSystem.getInstance().ROOT_FOLDER);
-        new Folder("C:\\testRD\\test", FileSystem.getInstance().ROOT_FOLDER);
-        new File ("testRD\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER) ;
+        new Folder("C:\\testRD", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new Folder("C:\\testRD\\test", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new File ("testRD\\testRD.RD", FileSystemSingleton.getInstance().ROOT_FOLDER) ;
         answer = fileSystemController.doCommand("rd testRD",user2);
         mustBe.clear();
         mustBe.add("Deleting Folder consist subFolders. Try use DELTREE command");
@@ -121,15 +121,15 @@ public class UserTest {
 
 
 
-        new File ("testRD.RD", FileSystem.getInstance().ROOT_FOLDER);
+        new File ("testRD.RD", FileSystemSingleton.getInstance().ROOT_FOLDER);
         answer = fileSystemController.doCommand("lock testRD.RD",user);
         mustBe.clear();
         mustBe.add("Lock testRD.RD");
         assertTrue(answer.equals(mustBe));
 
 
-        new Folder("C:\\testRD2", FileSystem.getInstance().ROOT_FOLDER);
-        new File ("testRD2\\testRD.RD", FileSystem.getInstance().ROOT_FOLDER) ;
+        new Folder("C:\\testRD2", FileSystemSingleton.getInstance().ROOT_FOLDER);
+        new File ("testRD2\\testRD.RD", FileSystemSingleton.getInstance().ROOT_FOLDER) ;
         answer =  fileSystemController.doCommand("lock testRD2\\testRD.RD",user2);
         answer = fileSystemController.doCommand("rd testRD2",user2);
         mustBe.clear();

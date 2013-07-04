@@ -2,11 +2,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * Класс помогает клиненту работать с консолью
  * Created with IntelliJ IDEA.
  * User: Serv
- * Date: 27.06.13
- * Time: 19:46
- * To change this template use File | Settings | File Templates.
  */
 public class ConsoleController {
 
@@ -20,6 +18,14 @@ public class ConsoleController {
 
     }
 
+    public void write(String message){
+        clientConsole.write(message);
+    }
+
+    /**
+     * Метод делает запрос на консоль для получения новой команды
+     * и стартует ее выполнение
+     */
     public void doNewCommand(){
         String [] command = getCommand();
 
@@ -27,8 +33,7 @@ public class ConsoleController {
 
     }
 
-    public void doCommand(String[] command)  {
-
+   private void doCommand(String[] command)  {
         try{
 
             switch (command[0].toLowerCase()){
@@ -75,24 +80,13 @@ public class ConsoleController {
 
     }
 
-    public String [] getCommand(){
-        //write("Type command");
+    private String [] getCommand(){
+
         commandLine  = clientConsole.readNewInput();
         String  [] command =   commandLine.split(" ");
 
         return command;
 
     }
-
-    public void write(String message){
-        clientConsole.write(message);
-    }
-
-    public void write(List<String> message){
-        for (String line : message){
-            clientConsole.write(line);
-        }
-    }
-
 
 }

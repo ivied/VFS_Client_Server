@@ -2,13 +2,7 @@ package VirtualFileSystem;
 
 
 import junit.framework.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,7 +16,7 @@ public class FolderTest {
     @Test
     public void createFolder(){
 
-        Folder folder = new Folder("C:\\test", FileSystem.getInstance().ROOT_FOLDER);
+        Folder folder = new Folder("C:\\test", FileSystemSingleton.getInstance().ROOT_FOLDER);
         Assert.assertTrue(folder.name.equals("test"));
         Folder folder1 = new Folder("C:\\test1\\test", folder);
         Assert.assertFalse(folder1.exist);
@@ -46,9 +40,9 @@ public class FolderTest {
         Assert.assertFalse(folder9.exist);
         Folder folder11 = new Folder("test2", folder8);
         Assert.assertTrue(folder11.exist);
-        Folder folder12 = new Folder("C:\\Test", FileSystem.getInstance().ROOT_FOLDER);
+        Folder folder12 = new Folder("C:\\Test", FileSystemSingleton.getInstance().ROOT_FOLDER);
         Assert.assertFalse(folder12.exist);
-        Folder folder13 = new Folder("C:\\Test3", FileSystem.getInstance().ROOT_FOLDER);
+        Folder folder13 = new Folder("C:\\Test3", FileSystemSingleton.getInstance().ROOT_FOLDER);
         Assert.assertTrue(folder13.exist);
         Folder folder14 = new Folder("Test3", folder);
         Assert.assertTrue(folder14.exist);
