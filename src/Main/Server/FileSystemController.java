@@ -22,8 +22,23 @@ public class FileSystemController {
     /**
      * Комманды файловой системы
      */
-    public enum Commands {
-        MD, PING, CD, MF, LOCK, UNLOCK, RD, DEL, DELTREE, COPY, MOVE, PRINT
+    public enum Commands  {
+        MD(1),
+        PING(0),
+        CD(1),
+        MF(1),
+        LOCK(1),
+        UNLOCK(1),
+        RD(1),
+        DEL(1),
+        DELTREE(1),
+        COPY(2),
+        MOVE(2),
+        PRINT(0);
+        protected final int signature;
+        Commands (int signature){
+             this.signature = signature;
+        }
     }
 
     /**
@@ -32,10 +47,12 @@ public class FileSystemController {
      */
     public List<String> doCommand(String messageReceived, User user) {
         this.user = user;
-        try{
+
             ArrayList<String> messageAsArray = new ArrayList<String>(Arrays.asList( messageReceived.split(" ")));
-            command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
-            messageAsArray.remove(0);
+            command = getCommandAndValidation(messageAsArray);
+            if (command== null)return answer("Bad command");
+            //command =  Commands.valueOf(messageAsArray.get(0).toUpperCase())  ;
+           // messageAsArray.remove(0);
 
             synchronized (fileSystem)  {
                 switch (command){
@@ -56,13 +73,12 @@ public class FileSystemController {
 
                 }
             }
-        }    catch (IllegalArgumentException e)  {
-            return answer("Wrong command");
-
-        }
-
 
     }
+
+
+
+
 
     private List<String> printFileSystem() {
         List<String> structure =  fileSystem.printStructure();
@@ -148,8 +164,10 @@ public class FileSystemController {
     }
 
     private FileSystemObj checkPath(String fileSystemObjPath) {
-        return fileSystem.checkPath(new ArrayList(Arrays.asList(fileSystemObjPath.split("\\\\"))), currentFolder);
+        return fileSystem.checkPath(FileSystemObj.getParentFoldersName(fileSystemObjPath), currentFolder);
     }
+
+
 
     private List<String> removingDependenciesFromCommand( FileSystemObj objToRemove) {
         switch (command){
@@ -220,6 +238,16 @@ public class FileSystemController {
         }   else return answer("Can not change directory");
     }
 
+    private Commands getCommandAndValidation(ArrayList<String> messageAsArray) {
+        try{
+            Commands command = Commands.valueOf(messageAsArray.get(0).toUpperCase());
+            messageAsArray.remove(0);
+            if (command.signature == (messageAsArray.size())) return command;
+        }    catch (IllegalArgumentException e)  {
+            return null ;
 
+        }
+        return null;
+    }
 
 }

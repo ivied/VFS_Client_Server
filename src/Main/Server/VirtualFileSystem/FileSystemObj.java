@@ -51,7 +51,6 @@ abstract public class FileSystemObj {
     }
 
 
-
     public boolean isFile (){
         return this.getClass() == File.class;
     }
@@ -72,15 +71,17 @@ abstract public class FileSystemObj {
         return checkingFlag == FILE_FLAG;
     }
 
+    public static List<String> getParentFoldersName(String path) {
+        return new ArrayList<String>(Arrays.asList(path.split("\\\\")));
+
+    }
+
     protected FileSystemObj setFlag(int flag){
         checkingFlag = flag;
         return this;
     }
 
-    private List<String> getParentFoldersName(String path) {
-        return new ArrayList<String>(Arrays.asList(path.split("\\\\")));
 
-    }
 
     private void setName(List<String> parentFoldersName) {
         name = parentFoldersName.get(parentFoldersName.size()-1);
