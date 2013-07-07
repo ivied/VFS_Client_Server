@@ -97,14 +97,16 @@ public class FileSystemController {
     private List<String> copyOrMoveObj(ArrayList<String> messageAsArray) {
         FileSystemObj objToCopy = checkPath(messageAsArray.get(0));
         FileSystemObj objToPaste = checkPath(messageAsArray.get(1));
-        if((objToCopy == null) || (objToPaste ==  null) ) return answer("Bad path") ;
+        if((objToCopy == null) || (objToPaste ==  null) || !objToPaste.isFlagingNew()) return answer("Bad path") ;
         if(command == Commands.MOVE) {
+            if(FileSystemSingleton.getInstance().checkObjExist(((Folder) objToPaste).folderList , objToCopy.name) != null) return answer("Bad path");
             List<String> ifRemoveAnswer = new ArrayList<>() ;
             ifRemoveAnswer.add("Remove " + objToCopy.name);
             command = (objToCopy.isFile())? Commands.DEL : Commands.DELTREE;
             if (!removeObj(messageAsArray).equals(ifRemoveAnswer)) return answer("Cant move this");
         }
-        if (!objToPaste.isFlagingNew() || (!objToCopy.isFlagingNew() && !objToCopy.isFlagingFile())) return answer("Bad path");
+        if (!objToCopy.isFlagingNew() && !objToCopy.isFlagingFile()) return answer("Bad path");
+        messageAsArray.remove(0);
         copyObj(messageAsArray, objToCopy);
         return answerWithFileSystemChanges("Copy " + objToCopy.name + " to " + objToPaste.name);
     }
@@ -135,13 +137,17 @@ public class FileSystemController {
     }
 
     private FileSystemObj copyObj(ArrayList<String> messageAsArray, FileSystemObj objToCopy) {
-        messageAsArray.add(0, messageAsArray.get(1).concat("\\" + objToCopy.name));
+        messageAsArray.add(0, messageAsArray.get(0).concat("\\" + objToCopy.name));
         return (objToCopy.isFile()) ?  copyFile(messageAsArray, (File) objToCopy) : copyFolder(messageAsArray, (Folder) objToCopy);
     }
 
     private Folder copyFolder(ArrayList<String> messageAsArray, Folder objToCopy) {
         Folder folder = fileSystem.createFolder(messageAsArray, currentFolder);
-        folder.folderList = new ArrayList<>((objToCopy).folderList);
+        for (FileSystemObj fileSystemObj : objToCopy.folderList){
+            messageAsArray.add(0, messageAsArray.get(0).concat("\\" + objToCopy.name));
+             folder.folderList.add(copyObj(messageAsArray,fileSystemObj));
+        }
+       /* folder.folderList = new ArrayList<>((objToCopy).folderList);*/
         return folder;
     }
 

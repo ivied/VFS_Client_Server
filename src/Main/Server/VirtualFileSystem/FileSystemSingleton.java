@@ -87,6 +87,16 @@ public class FileSystemSingleton {
         addToFolderWithLexicOrder(parentFolder, objToAdd, subFoldersNames);
     }
 
+    /**
+     * Метод проверят, есть ли объект с именем subFolderName  в катологе reviseFolder
+     */
+    public FileSystemObj checkObjExist(ArrayList<FileSystemObj> reviseFolder, String subFolderName) {
+        for(FileSystemObj fileSystemObj : reviseFolder) {
+            if( fileSystemObj.name.equalsIgnoreCase(subFolderName)  )
+                return  fileSystemObj;
+        }
+        return null;
+    }
 
     private List<String> getFolderStructure(List<String> structure,Folder folder, int depth) {
 
@@ -152,13 +162,7 @@ public class FileSystemSingleton {
         return false;
     }
 
-    private FileSystemObj checkObjExist(ArrayList<FileSystemObj> reviseFolder, String subFolderName) {
-        for(FileSystemObj fileSystemObj : reviseFolder) {
-            if( fileSystemObj.name.equalsIgnoreCase(subFolderName)  )
-                return  fileSystemObj;
-        }
-        return null;
-    }
+
 
 
     private void addToFolderWithLexicOrder(Folder parentFolder, FileSystemObj objToAdd, String[] subFoldersNames) {
