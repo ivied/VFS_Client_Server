@@ -183,16 +183,16 @@ public class UserTest {
 
         answer =fileSystemController.doCommand("move folder1\\subFolder1 c:", user2);
         mustBe.clear();
-        mustBe.add("Cant move this");
+        mustBe.add("Bad path");
         assertTrue(answer.equals(mustBe));
 
 
 
         fileSystemController.doCommand("unlock folder1\\subFolder1\\file",user);
 
-        answer =fileSystemController.doCommand("move folder1\\subFolder1 c:", user2);
+        answer =fileSystemController.doCommand("move folder1\\subFolder1\\file c:", user2);
         mustBe.clear();
-        mustBe.add("Copy subFolder1 to C:");
+        mustBe.add("Copy file to C:");
         assertTrue(answer.equals(mustBe));
 
     }

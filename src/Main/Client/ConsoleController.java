@@ -47,9 +47,8 @@ public class ConsoleController {
                     messagingWithServer(commandLine);
                     break;
             }
-        }    catch (IllegalArgumentException e)  {
-
-
+        }    catch (IllegalArgumentException |ArrayIndexOutOfBoundsException e){
+            write("Bad command");
         }
         doNewCommand();
 

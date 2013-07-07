@@ -15,7 +15,7 @@ public class Client {
 
     ConsoleController consoleController;
     protected volatile Socket serverSocket;
-    private ConnectData connectData;
+
     PrintWriter output;
     volatile BufferedReader  input;
     MessageReceiver messageReceiver;
@@ -28,7 +28,7 @@ public class Client {
 
     public void connect(ConnectData connectData ) throws IOException {
         if (messageReceiver != null){output.println("quit");}
-        this.connectData = connectData;
+
 
         serverSocket = new Socket(connectData.ip,connectData.port);
 
