@@ -106,14 +106,17 @@ public class FileSystemSingleton {
 
             FileSystemObj fileSystemObj = checkObjExist(startFolder.folderList, subObjName);
 
-            if (fileSystemObj != null && fileSystemObj.isFile())return fileSystemObj.setFlag(FileSystemObj.FILE_FLAG);
+            if (fileSystemObj != null && fileSystemObj.isFile()) return (subObjNumber == parentFoldersName.size()-1) ?
+                        fileSystemObj.setFlag(FileSystemObj.FILE_FLAG) :
+                        savedFolder.setFlag(FileSystemObj.CURRENT_FOLDER_FLAG);
+
             if ((fileSystemObj == null)&&(subObjNumber == parentFoldersName.size()-1)) return null;
 
 
             if (fileSystemObj == null ) return savedFolder.setFlag(FileSystemObj.CURRENT_FOLDER_FLAG);
             startFolder = (Folder) fileSystemObj;
         }
-        return startFolder.setFlag(FileSystemObj.NEW_FOLDER_FLAG);
+        return startFolder.setFlag(FileSystemObj.FOLDER_EXIST_FLAG);
     }
 
 
@@ -162,7 +165,7 @@ public class FileSystemSingleton {
         int i;
         for(i = 0; i <  subFoldersNames.length; i++) {
             if(objToAdd.name.equalsIgnoreCase(subFoldersNames[i])){
-                if (checkObjExist(parentFolder.folderList, objToAdd.name) == null) parentFolder.folderList.add(i,objToAdd);
+                parentFolder.folderList.add(i,objToAdd);
                 return;
             }
         }

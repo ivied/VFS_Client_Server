@@ -19,7 +19,7 @@ abstract public class FileSystemObj {
      *  Флаг присваивается объекту системы в методе FileSystemSingelton.chekPath()
      *  если невозможно найти указанный путь в дирректории, но это последний  объект в  пути
      */
-    public final static int NEW_FOLDER_FLAG = 1;
+    public final static int FOLDER_EXIST_FLAG = 1;
     /**
      *  Флаг присваивается объекту системы в методе FileSystemSingelton.chekPath()
      *  если путь заканичвается файлом
@@ -41,7 +41,7 @@ abstract public class FileSystemObj {
         setName(parentFoldersName);
         if (name.equalsIgnoreCase("C:")) return;
         FileSystemObj newObj = FileSystemSingleton.getInstance().checkPath(parentFoldersName, currentFolder);
-        if (newObj == null){
+        if (newObj == null ){
             parentFoldersName.remove(parentFoldersName.size() - 1);
             parentFolder = parentFoldersName.isEmpty() ? parentFolder = currentFolder : (Folder) FileSystemSingleton.getInstance().checkPath(parentFoldersName, currentFolder);
             FileSystemSingleton.getInstance().addObjWithLexicOrder(parentFolder, this);
@@ -64,7 +64,7 @@ abstract public class FileSystemObj {
     }
 
     public boolean isFlagingNew (){
-        return checkingFlag == NEW_FOLDER_FLAG;
+        return checkingFlag == FOLDER_EXIST_FLAG;
     }
 
     public boolean isFlagingFile (){
