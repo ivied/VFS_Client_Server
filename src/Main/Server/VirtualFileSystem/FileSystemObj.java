@@ -52,11 +52,11 @@ abstract public class FileSystemObj {
 
 
     public boolean isFile (){
-        return this.getClass() == File.class;
+        return this instanceof File;
     }
 
     public boolean isFolder (){
-        return this.getClass() == Folder.class;
+        return this instanceof Folder;
     }
 
     public boolean isFlagingCurrent (){
